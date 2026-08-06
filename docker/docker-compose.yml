@@ -1,0 +1,116 @@
+x-airflow-common:
+  &airflow-common
+
+  image: ${AIRFLOW_IMAGE_NAME}
+
+  user: "${AIRFLOW_UID}:0"
+
+  volumes:
+    - ../airflow/dags:/opt/airflow/dags
+    - ../airflow/logs:/opt/airflow/logs
+    - ../airflow/plugins:/opt/airflow/plugins
+
+  environment:
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
+
+    AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
+
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  redis:
+    image: redis:7
+    container_name: redis
+
+  airflow-init:
+    <<: *airflow-common
+
+    volumes:
+    - ../airflow/dags:/opt/airflow/dags
+    - ../airflow/logs:/opt/airflow/logs
+    - ../airflow/plugins:/opt/airflow/plugins
+    - ../scripts:/scripts
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_started
+
+    command:
+      - bash
+      - /scripts/airflow-init.sh
+  airflow-scheduler:
+    <<: *airflow-common
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_started
+
+      airflow-init:
+        condition: service_completed_successfully
+
+    command:
+      - scheduler
+
+  airflow-worker:
+    <<: *airflow-common
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_started
+
+      airflow-init:
+        condition: service_completed_successfully
+
+    command:
+      - celery
+      - worker
+
+  airflow-webserver:
+    <<: *airflow-common
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+    command:
+      - webserver
+
+volumes:
+  postgres_data:
