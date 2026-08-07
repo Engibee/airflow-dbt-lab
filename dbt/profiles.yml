@@ -8,6 +8,6 @@ airflow_dbt_lab:
       port: 5432
       user: "{{ env_var('POSTGRES_USER') }}"
       password: "{{ env_var('POSTGRES_PASSWORD') }}"
-      dbname: "{{ env_var('POSTGRES_DB') }}"
-      schema: analytics
+      dbname: analytics
+      schema: public
       threads: 4
