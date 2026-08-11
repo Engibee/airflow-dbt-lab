@@ -3,11 +3,9 @@ from airflow.operators.bash import BashOperator
 
 from datetime import datetime
 
-
 default_args = {
-    "owner": "airflow",
+"owner": "airflow",
 }
-
 
 with DAG(
     dag_id="dbt_pipeline",
@@ -16,6 +14,14 @@ with DAG(
     schedule="@daily",
     catchup=False,
 ) as dag:
+
+    dbt_seed = BashOperator(
+        task_id="dbt_seed",
+        bash_command="""
+        cd /opt/airflow/dbt &&
+        dbt seed --profiles-dir .
+        """,
+    )
 
     dbt_run = BashOperator(
         task_id="dbt_run",
@@ -33,4 +39,4 @@ with DAG(
         """,
     )
 
-    dbt_run >> dbt_test
+    dbt_seed >> dbt_run >> dbt_test

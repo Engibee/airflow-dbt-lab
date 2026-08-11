@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: customers
+    description: "Tabela de clientes preparada para análise"
+
+    columns:
+      - name: id
+        description: "Identificador único do cliente"
+        tests:
+          - not_null
+          - unique
+
+      - name: name
+        description: "Nome do cliente"
+        tests:
+          - not_null
+
+      - name: email
+        description: "Email do cliente"
+        tests:
+          - not_null

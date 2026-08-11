@@ -20,4 +20,12 @@ clean-targets:
 
 models:
   airflow_dbt_lab:
-    +materialized: table
+    staging:
+      +schema: staging
+
+    marts:
+      +schema: marts
+
+seeds:
+  airflow_dbt_lab:
+    +schema: raw
