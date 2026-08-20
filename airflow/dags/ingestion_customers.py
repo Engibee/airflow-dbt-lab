@@ -10,36 +10,26 @@ def load_customers():
         postgres_conn_id="analytics_postgres"
     )
 
-    # 1. Lê o último timestamp processado
-    watermark = hook.get_first(
-        """
+    watermark = hook.get_first("""
         SELECT last_updated_at
         FROM raw.ingestion_control
         WHERE pipeline_name = 'customers'
-        """
-    )[0]
+    """)
 
-    print(f"Watermark atual: {watermark}")
+    last_updated_at = watermark[0]
 
-    # 2. Extrai da fonte externa
-    customers = hook.get_records(
-        """
-        SELECT id, name, email, updated_at
-        FROM external.customers
-        WHERE updated_at > %s
-        ORDER BY updated_at
-        """,
-        parameters=(watermark,),
-    )
+    customers = hook.get_records("""
+    SELECT id, name, email, updated_at
+    FROM external.customers
+    WHERE updated_at > %s
+    ORDER BY updated_at, id
+""", parameters=(last_updated_at,))
 
-    if not customers:
-        print("Nenhum registro novo ou alterado.")
-        return
+    print(f"Watermark: {last_updated_at}")
+    print(f"Novos registros encontrados: {customers}")
 
-    print(f"Encontrados {len(customers)} registros.")
-
-    # 3. Carrega na RAW
-    hook.insert_rows(
+    if customers:
+        hook.insert_rows(
         table="raw.raw_customers",
         rows=customers,
         target_fields=["id", "name", "email", "updated_at"],
@@ -47,8 +37,7 @@ def load_customers():
         replace_index=["id"],
     )
 
-    # 4. Avança o watermark
-    new_watermark = max(row[3] for row in customers)
+    new_watermark = customers[-1][3]
 
     hook.run(
         """
@@ -58,8 +47,6 @@ def load_customers():
         """,
         parameters=(new_watermark,),
     )
-
-    print(f"Watermark atualizado para: {new_watermark}")
 
 
 with DAG(
