@@ -1,12 +1,24 @@
+# Python
 .venv/
 __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
-target/
+
+# dbt
+dbt/target/
+dbt/logs/
+
+# Airflow
 logs/
+
+# Environment
 .env
-.DS_Store
+
+# IDE
 .idea/
 .vscode/
+
+# OS
+.DS_Store
