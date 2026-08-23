@@ -16,5 +16,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run CI
-        run: echo "CI funcionando!"
+      - name: Start PostgreSQL
+        working-directory: docker
+        run: docker compose up -d postgres
+
+      - name: Check PostgreSQL
+        working-directory: docker
+        run: docker compose ps postgres
