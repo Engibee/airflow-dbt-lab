@@ -22,7 +22,18 @@ jobs:
           POSTGRES_USER: airflow
           POSTGRES_PASSWORD: airflow
           POSTGRES_DB: analytics
-        run: docker compose up -d postgres
+        run: |
+          docker compose up -d postgres || {
+            docker compose logs postgres
+            exit 1
+          }
+
+          sleep 5
+
+          if ! docker compose ps postgres | grep -q "Up"; then
+            docker compose logs postgres
+            exit 1
+          fi
 
       - name: Check PostgreSQL
         working-directory: docker
