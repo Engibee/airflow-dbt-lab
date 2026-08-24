@@ -1,0 +1,49 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show deployed commit
+        run: |
+          echo "Deploying commit:"
+          git rev-parse HEAD
+
+      - name: Validate Docker Compose
+        working-directory: docker
+        env:
+          POSTGRES_USER: airflow
+          POSTGRES_PASSWORD: airflow
+          POSTGRES_DB: analytics
+          AIRFLOW_UID: 50000
+        run: |
+          docker compose config
+
+      - name: Start services
+        working-directory: docker
+        env:
+          POSTGRES_USER: airflow
+          POSTGRES_PASSWORD: airflow
+          POSTGRES_DB: analytics
+          AIRFLOW_UID: 50000
+        run: |
+          docker compose up -d
+
+      - name: Check services
+        working-directory: docker
+        env:
+          POSTGRES_USER: airflow
+          POSTGRES_PASSWORD: airflow
+          POSTGRES_DB: analytics
+          AIRFLOW_UID: 50000
+        run: |
+          docker compose ps

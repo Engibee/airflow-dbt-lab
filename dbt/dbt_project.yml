@@ -25,7 +25,3 @@ models:
 
     marts:
       +schema: marts
-
-seeds:
-  airflow_dbt_lab:
-    +schema: raw
