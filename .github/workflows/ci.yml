@@ -55,7 +55,7 @@ jobs:
           POSTGRES_USER: airflow
           POSTGRES_PASSWORD: airflow
           POSTGRES_DB: analytics
-        run: docker compose run --rm dbt dbt debug --profiles-dir .
+        run: docker compose run --rm --entrypoint dbt dbt debug --profiles-dir .
 
       - name: Run dbt
         working-directory: docker
@@ -63,7 +63,7 @@ jobs:
           POSTGRES_USER: airflow
           POSTGRES_PASSWORD: airflow
           POSTGRES_DB: analytics
-        run: docker compose run --rm dbt dbt run --profiles-dir .
+        run: docker compose run --rm --entrypoint dbt dbt run --profiles-dir .
         
       - name: Test dbt
         working-directory: docker
@@ -71,4 +71,4 @@ jobs:
           POSTGRES_USER: airflow
           POSTGRES_PASSWORD: airflow
           POSTGRES_DB: analytics
-        run: docker compose run --rm dbt dbt test --profiles-dir .
+        run: docker compose run --rm --entrypoint dbt dbt test --profiles-dir .
