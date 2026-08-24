@@ -9,12 +9,18 @@ __pycache__/
 # dbt
 dbt/target/
 dbt/logs/
+dbt/.user.yml
 
 # Airflow
+airflow/logs/
+
+# Logs
 logs/
+docker/logs/
 
 # Environment
 .env
+docker/.env
 
 # IDE
 .idea/
@@ -22,3 +28,4 @@ logs/
 
 # OS
 .DS_Store
+Thumbs.db
