@@ -39,10 +39,36 @@ jobs:
         working-directory: docker
         run: docker compose ps postgres
 
-      - name: Test dbt connection
+      - name: Prepare test data
+        working-directory: docker
+        env:
+          POSTGRES_USER: airflow
+          PGPASSWORD: airflow
+        run: |
+          docker compose exec -T postgres \
+            psql -U "$POSTGRES_USER" -d analytics \
+            < postgres/ci-init.sql
+
+      - name: Debug dbt
         working-directory: docker
         env:
           POSTGRES_USER: airflow
           POSTGRES_PASSWORD: airflow
           POSTGRES_DB: analytics
         run: docker compose run --rm dbt dbt debug --profiles-dir .
+
+      - name: Run dbt
+        working-directory: docker
+        env:
+          POSTGRES_USER: airflow
+          POSTGRES_PASSWORD: airflow
+          POSTGRES_DB: analytics
+        run: docker compose run --rm dbt dbt run --profiles-dir .
+        
+      - name: Test dbt
+        working-directory: docker
+        env:
+          POSTGRES_USER: airflow
+          POSTGRES_PASSWORD: airflow
+          POSTGRES_DB: analytics
+        run: docker compose run --rm dbt dbt test --profiles-dir .
