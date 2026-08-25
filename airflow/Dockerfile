@@ -10,5 +10,6 @@ RUN apt-get update \
 USER airflow
 
 RUN pip install --no-cache-dir \
+    'protobuf>=3.19,<5.0' \
     dbt-core==1.9.0 \
     dbt-postgres==1.9.0

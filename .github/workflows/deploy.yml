@@ -36,7 +36,7 @@ jobs:
           POSTGRES_DB: analytics
           AIRFLOW_UID: 50000
         run: |
-          docker compose up
+          docker compose up -d
 
       - name: Show service logs on failure
         if: failure()
@@ -54,3 +54,9 @@ jobs:
           AIRFLOW_UID: 50000
         run: |
           docker compose ps
+      
+      - name: View airflow-init logs on failure
+        if: failure()
+        working-directory: docker
+        run: |
+          docker compose logs airflow-init
