@@ -27,7 +27,16 @@ jobs:
           POSTGRES_DB=analytics
           AIRFLOW_UID=50000
           EOF
-
+      - name: Initialize directories
+        working-directory: docker
+        run: |
+          mkdir -p ../airflow/logs
+          mkdir -p ../airflow/dags
+          mkdir -p ../airflow/plugins
+          chmod 777 ../airflow/logs
+          chmod 777 ../airflow/dags
+          chmod 777 ../airflow/plugins
+          
       - name: Validate Docker Compose
         working-directory: docker
         env:
