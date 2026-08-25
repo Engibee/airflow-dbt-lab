@@ -18,6 +18,16 @@ jobs:
           echo "Deploying commit:"
           git rev-parse HEAD
 
+      - name: Create .env file
+        working-directory: docker
+        run: |
+          cat > .env << EOF
+          POSTGRES_USER=airflow
+          POSTGRES_PASSWORD=airflow
+          POSTGRES_DB=analytics
+          AIRFLOW_UID=50000
+          EOF
+
       - name: Validate Docker Compose
         working-directory: docker
         env:
